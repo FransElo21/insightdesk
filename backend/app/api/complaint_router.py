@@ -3,16 +3,6 @@ from typing import List
 from fastapi import APIRouter
 from fastapi import Depends
 
-from sqlalchemy.orm import Session
-
-from app.database.dependencies import (
-    get_db
-)
-
-from app.repositories.complaint_repository import (
-    ComplaintRepository
-)
-
 from app.services.complaint_service import (
     ComplaintService
 )
@@ -20,6 +10,10 @@ from app.services.complaint_service import (
 from app.schemas.complaint_schema import (
     ComplaintCreate,
     ComplaintResponse
+)
+
+from app.dependencies.complaint_dependency import (
+    get_complaint_service
 )
 
 router = APIRouter(
@@ -34,21 +28,15 @@ router = APIRouter(
 )
 def create_complaint(
     request: ComplaintCreate,
-    db: Session = Depends(
-        get_db
+    service: ComplaintService = Depends(
+        get_complaint_service
     )
 ):
 
-    repository = ComplaintRepository(
-        db
-    )
-
-    service = ComplaintService(
-        repository
-    )
-
-    return service.create_complaint(
-        request
+    return (
+        service.create_complaint(
+            request
+        )
     )
 
 
@@ -59,17 +47,29 @@ def create_complaint(
     ]
 )
 def get_complaints(
-    db: Session = Depends(
-        get_db
+    service: ComplaintService = Depends(
+        get_complaint_service
     )
 ):
 
-    repository = ComplaintRepository(
-        db
+    return (
+        service.get_complaints()
     )
 
-    service = ComplaintService(
-        repository
-    )
 
-    return service.get_complaints()
+@router.get(
+    "/{complaint_id}",
+    response_model=ComplaintResponse
+)
+def get_complaint(
+    complaint_id: int,
+    service: ComplaintService = Depends(
+        get_complaint_service
+    )
+):
+
+    return (
+        service.get_complaint_by_id(
+            complaint_id
+        )
+    )
