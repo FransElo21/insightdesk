@@ -1,6 +1,9 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
+from datetime import datetime
+from datetime import timedelta
+
 from app.models.complaint_model import (
     Complaint
 )
@@ -207,3 +210,23 @@ class ComplaintRepository:
         )
 
         return result
+    
+    def get_last_days(
+    self,
+        days: int
+    ):
+
+        start_date = (
+            datetime.utcnow()
+            - timedelta(days=days)
+        )
+
+        return (
+            self.db.query(
+                Complaint
+            )
+            .filter(
+                Complaint.created_at >= start_date
+            )
+            .all()
+        )

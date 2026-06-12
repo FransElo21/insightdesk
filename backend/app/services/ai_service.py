@@ -67,38 +67,57 @@ Pengaduan:
 
         return response.choices[0].message.content.strip()
 
-    def generate_insight(self, complaints: list[str]) -> str:
+    def generate_insight( self, complaints: list[str], days: int ) -> str:
         prompt = f"""
-Anda adalah analis pengaduan profesional.
+    Anda adalah analis pengaduan profesional.
 
-Berikut adalah kumpulan pengaduan:
+    Data berikut berasal dari
+    {days} hari terakhir.
 
-{chr(10).join(complaints)}
+    Jumlah pengaduan:
+    {len(complaints)}
 
-Analisis seluruh data tersebut.
+    Daftar pengaduan:
 
-Buat output dengan format berikut:
+    {chr(10).join(complaints)}
 
-Ringkasan:
-(Jelaskan kondisi umum pengaduan)
+    Analisis data tersebut dan buat output dengan format berikut:
 
-Masalah Utama:
-(Sebutkan masalah yang paling dominan)
+    Ringkasan:
+    ...
 
-Trend:
-(Jelaskan pola atau tren yang terlihat)
+    Masalah Utama:
+    ...
 
-Rekomendasi:
-(Berikan rekomendasi tindakan)
+    Trend:
+    ...
 
-Gunakan bahasa Indonesia yang profesional,
-ringkas, dan mudah dipahami.
-"""
+    Rekomendasi:
+    ...
 
-        response = self.client.chat.completions.create(
-            model=self.model,
-            temperature=0.3,
-            messages=[{"role": "user", "content": prompt}],
+    Gunakan bahasa Indonesia yang profesional,
+    ringkas, dan mudah dipahami.
+
+    Fokus pada pola keluhan yang paling sering muncul.
+    """
+
+        response = (
+            self.client.chat.completions.create(
+                model=self.model,
+                temperature=0.3,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ]
+            )
         )
 
-        return response.choices[0].message.content.strip()
+        return (
+            response
+            .choices[0]
+            .message
+            .content
+            .strip()
+        )

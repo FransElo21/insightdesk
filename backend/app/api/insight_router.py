@@ -26,13 +26,16 @@ router = APIRouter(
     response_model=InsightResponse
 )
 def generate_insight(
+    days: int = 30,
     service: InsightService = Depends(
         get_insight_service
     )
 ):
 
     return (
-        service.generate_insight()
+        service.generate_insight(
+            days
+        )
     )
 
 @router.get(

@@ -10,6 +10,10 @@ from app.services.ai_service import (
     AIService
 )
 
+from app.core.logger import (
+    logger
+)
+
 
 class ComplaintService:
 
@@ -27,12 +31,32 @@ class ComplaintService:
         request
     ):
 
+        logger.info(
+            f"Creating complaint: "
+            f"{request.title}"
+        )
+
         try:
+
+            logger.info(
+                "Calling AI "
+                "for classification"
+            )
 
             category = (
                 self.ai_service.classify(
                     request.description
                 )
+            )
+
+            logger.info(
+                f"Category predicted: "
+                f"{category}"
+            )
+
+            logger.info(
+                "Calling AI "
+                "for sentiment"
             )
 
             sentiment = (
@@ -41,14 +65,24 @@ class ComplaintService:
                 )
             )
 
-        except Exception as e:
-
-            print(
-                f"AI Error: {e}"
+            logger.info(
+                f"Sentiment predicted: "
+                f"{sentiment}"
             )
 
-            category = "Tidak Diketahui"
-            sentiment = "Netral"
+        except Exception as e:
+
+            logger.exception(
+                f"AI processing failed: {e}"
+            )
+
+            category = (
+                "Tidak Diketahui"
+            )
+
+            sentiment = (
+                "Netral"
+            )
 
         complaint = Complaint(
             title=request.title,
@@ -58,15 +92,32 @@ class ComplaintService:
             sentiment=sentiment
         )
 
-        return (
+        logger.info(
+            "Saving complaint "
+            "to database"
+        )
+
+        result = (
             self.repository.create(
                 complaint
             )
         )
 
+        logger.info(
+            f"Complaint created "
+            f"successfully "
+            f"(id={result.id})"
+        )
+
+        return result
+
     def get_complaints(
         self
     ):
+
+        logger.info(
+            "Fetching all complaints"
+        )
 
         return (
             self.repository.get_all()
@@ -76,6 +127,11 @@ class ComplaintService:
         self,
         complaint_id: int
     ):
+
+        logger.info(
+            f"Fetching complaint "
+            f"id={complaint_id}"
+        )
 
         return (
             self.repository.get_by_id(
