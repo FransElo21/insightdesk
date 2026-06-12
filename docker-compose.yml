@@ -1,0 +1,60 @@
+services:
+
+  postgres:
+    image: postgres:16
+
+    container_name: insightdesk_db
+
+    restart: always
+
+    environment:
+      POSTGRES_DB: insightdesk
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgresql123
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+
+    build:
+      context: ./backend
+
+    container_name: insightdesk_backend
+
+    restart: always
+
+    depends_on:
+      - postgres
+
+    ports:
+      - "8000:8000"
+
+    environment:
+      DATABASE_URL: postgresql://postgres:postgresql123@postgres:5432/insightdesk
+      MAIA_API_KEY: ${MAIA_API_KEY}
+      MAIA_BASE_URL: ${MAIA_BASE_URL}
+
+  frontend:
+
+    build:
+      context: ./frontend
+
+    container_name: insightdesk_frontend
+
+    restart: always
+
+    depends_on:
+      - backend
+
+    ports:
+      - "3000:3000"
+
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+
+volumes:
+  postgres_data:
